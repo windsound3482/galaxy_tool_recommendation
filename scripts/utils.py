@@ -5,7 +5,7 @@ import h5py
 import random
 from numpy.random import choice
 
-from keras import backend as K
+from tensorflow.keras import backend as K
 
 
 def read_file(file_path):
@@ -166,10 +166,10 @@ def compute_precision(model, x, y, reverse_data_dictionary, usage_scores, actual
     normal_pred = prediction[half_len:]
 
     standard_prediction_pos = np.argsort(standard_pred, axis=-1)
-    standard_topk_prediction_pos = standard_prediction_pos[-topk]
+    standard_topk_prediction_pos = standard_prediction_pos[-topk:]
 
     normal_prediction_pos = np.argsort(normal_pred, axis=-1)
-    normal_topk_prediction_pos = normal_prediction_pos[-topk]
+    normal_topk_prediction_pos = normal_prediction_pos[-topk:]
 
     # get true tools names
     for a_t_pos in actual_classes_pos:
@@ -180,35 +180,37 @@ def compute_precision(model, x, y, reverse_data_dictionary, usage_scores, actual
         actual_next_tool_names.append(t_name)
     last_tool_name = reverse_data_dictionary[x[-1]]
     # compute scores for published recommendations
-    if standard_topk_prediction_pos in reverse_data_dictionary:
-        pred_t_name = reverse_data_dictionary[int(standard_topk_prediction_pos)]
-        if last_tool_name in standard_conn:
-            pub_tools = standard_conn[last_tool_name]
-            if pred_t_name in pub_tools:
-                pub_precision = 1.0
-                # count precision only when there is actually true published tools
-                if last_tool_id in lowest_tool_ids:
-                    lowest_pub_prec = 1.0
-                else:
-                    lowest_pub_prec = np.nan
-                if standard_topk_prediction_pos in usage_scores:
-                    usage_wt_score.append(np.log(usage_scores[standard_topk_prediction_pos] + 1.0))
-        else:
-            # count precision only when there is actually true published tools
-            # else set to np.nan. Set to 0 only when there is wrong prediction
-            pub_precision = np.nan
-            lowest_pub_prec = np.nan
-    # compute scores for normal recommendations
-    if normal_topk_prediction_pos in reverse_data_dictionary:
-        pred_t_name = reverse_data_dictionary[int(normal_topk_prediction_pos)]
-        if pred_t_name in actual_next_tool_names:
-            if normal_topk_prediction_pos in usage_scores:
-                usage_wt_score.append(np.log(usage_scores[normal_topk_prediction_pos] + 1.0))
-            top_precision = 1.0
-            if last_tool_id in lowest_tool_ids:
-                lowest_norm_prec = 1.0
+    for single_standard_topk_prediction_pos in standard_topk_prediction_pos:
+        if single_standard_topk_prediction_pos in reverse_data_dictionary:
+            pred_t_name = reverse_data_dictionary[int(single_standard_topk_prediction_pos)]
+            if last_tool_name in standard_conn:
+                pub_tools = standard_conn[last_tool_name]
+                if pred_t_name in pub_tools:
+                    pub_precision = 1.0
+                    # count precision only when there is actually true published tools
+                    if last_tool_id in lowest_tool_ids:
+                        lowest_pub_prec = 1.0
+                    else:
+                        lowest_pub_prec = np.nan
+                    if single_standard_topk_prediction_pos in usage_scores:
+                        usage_wt_score.append(np.log(usage_scores[single_standard_topk_prediction_pos] + 1.0))
             else:
-                lowest_norm_prec = np.nan
+                # count precision only when there is actually true published tools
+                # else set to np.nan. Set to 0 only when there is wrong prediction
+                pub_precision = np.nan
+                lowest_pub_prec = np.nan
+    # compute scores for normal recommendations
+    for single_normal_topk_prediction_pos in normal_topk_prediction_pos:
+        if single_normal_topk_prediction_pos in reverse_data_dictionary:
+            pred_t_name = reverse_data_dictionary[int(single_normal_topk_prediction_pos)]
+            if pred_t_name in actual_next_tool_names:
+                if single_normal_topk_prediction_pos in usage_scores:
+                    usage_wt_score.append(np.log(usage_scores[single_normal_topk_prediction_pos] + 1.0))
+                top_precision = 1.0
+                if last_tool_id in lowest_tool_ids:
+                    lowest_norm_prec = 1.0
+                else:
+                    lowest_norm_prec = np.nan
     if len(usage_wt_score) > 0:
         mean_usage = np.mean(usage_wt_score)
     return mean_usage, top_precision, pub_precision, lowest_pub_prec, lowest_norm_prec
