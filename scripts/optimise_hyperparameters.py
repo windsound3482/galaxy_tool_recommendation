@@ -116,8 +116,7 @@ class HyperparameterOptimisation:
                 truee=0
                 for index,i in enumerate(y_pred_location[indexx]):
                     if (i in y_acc_location[indexx]):
-                        if (y_acc_values[indexx][np.where(y_acc_location[indexx] == i)]>0.5):
-                            true_positive+=y_pred_values[indexx][index]
+                        true_positive+=y_pred_values[indexx][index]
                 
                 for i in y_acc_values[indexx]:
                     if (i>0.5):
