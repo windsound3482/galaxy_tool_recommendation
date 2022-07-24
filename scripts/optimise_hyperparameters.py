@@ -136,11 +136,13 @@ class HyperparameterOptimisation:
             model = Sequential()
             model.add(Embedding(dimensions, int(params["embedding_size"]), mask_zero=True))
             model.add(SpatialDropout1D(params["spatial_dropout"]))
+            
             model.add(GRU(int(params["units"]), dropout=params["dropout"], recurrent_dropout=0, return_sequences=True, activation="tanh"))
             model.add(Dropout(params["dropout"]))
             model.add(GRU(int(params["units"]), dropout=params["dropout"], recurrent_dropout=0, return_sequences=False, activation="tanh"))
             model.add(Dropout(params["dropout"]))
             model.add(Dense(2 * dimensions, activation="sigmoid"))
+            print (model.summary())
             optimizer_rms = RMSprop(lr=params["learning_rate"])
             batch_size = int(params["batch_size"])
             model.compile(loss=utils.weighted_loss(class_weights), optimizer=optimizer_rms,metrics=[tf.keras.metrics.BinaryAccuracy(),nDCG,Precision,Recall,f1])

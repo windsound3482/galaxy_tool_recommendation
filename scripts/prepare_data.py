@@ -92,20 +92,11 @@ class PrepareData:
                 tools = item.split(",")
                 label = tools[-1]
                 train_tools = tools[:len(tools) - 1]
-                last_but_one_name = reverse_dictionary[int(train_tools[-1])]
-                try:
-                    compatible_tools = compatible_next_tools[last_but_one_name].split(",")
-                except Exception:
-                    continue
-                if len(compatible_tools) > 0:
-                    compatible_tools_ids = [str(dictionary[x]) for x in compatible_tools]
-                    compatible_tools_ids.append(label)
-                    composite_labels = ",".join(compatible_tools_ids)
                 train_tools = ",".join(train_tools)
                 if train_tools in paths_labels:
-                    paths_labels[train_tools] += "," + composite_labels
+                    paths_labels[train_tools] += "," + label
                 else:
-                    paths_labels[train_tools] = composite_labels
+                    paths_labels[train_tools] = label
         for item in paths_labels:
             paths_labels[item] = ",".join(list(set(paths_labels[item].split(","))))
         return paths_labels
@@ -265,10 +256,14 @@ class PrepareData:
         # pad training and test data with leading zeros
         test_data, test_labels = self.pad_paths(test_paths_dict, num_classes, standard_connections, rev_dict)
         train_data, train_labels = self.pad_paths(train_paths_dict, num_classes, standard_connections, rev_dict)
-        utils.write_file("data/train_data.txt", train_data.tolist())
-        utils.write_file("data/test_data.txt", test_data.tolist())
-        utils.write_file("data/train_labels.txt", train_labels.tolist())
-        utils.write_file("data/test_labels.txt", test_labels.tolist())
+        train_data=train_data.tolist()
+        test_data=test_data.tolist()
+        train_labels=train_labels.tolist()
+        test_labels=test_labels.tolist()
+        utils.write_file("data/train_data.txt", train_data)
+        utils.write_file("data/test_data.txt", test_data)
+        utils.write_file("data/train_labels.txt", train_labels)
+        utils.write_file("data/test_labels.txt", test_labels)
         
 
         # Predict tools usage

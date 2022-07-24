@@ -111,27 +111,22 @@ def collect_sampled_tool_freq(collected_dict, c_freq):
     return collected_dict
 
 
-def balanced_sample_generator(train_data, train_labels, batch_size, l_tool_tr_samples, reverse_dictionary):
-    l_tool_frequencies = dict()
-    while True:
-        dimension = train_data.shape[1]
-        n_classes = train_labels.shape[1]
-        tool_ids = list(l_tool_tr_samples.keys())
-        random.shuffle(tool_ids)
-        generator_batch_data = np.zeros([batch_size, dimension])
-        generator_batch_labels = np.zeros([batch_size, n_classes])
-        generated_tool_ids = choice(tool_ids, batch_size)
-        for i in range(batch_size):
-            random_toolid = generated_tool_ids[i]
-            sample_indices = l_tool_tr_samples[str(random_toolid)]
-            random_index = random.sample(range(0, len(sample_indices)), 1)[0]
-            random_tr_index = sample_indices[random_index]
-            generator_batch_data[i] = train_data[random_tr_index]
-            generator_batch_labels[i] = train_labels[random_tr_index]
-        freq = verify_oversampling_freq(generator_batch_data, reverse_dictionary)
-        l_tool_frequencies = collect_sampled_tool_freq(l_tool_frequencies, freq)
-        write_file("data/generated_tool_frequencies.txt", l_tool_frequencies)
-        yield generator_batch_data, generator_batch_labels
+def balanced_sample_generator(train_data, train_labels,batch_size):
+    samples_per_epoch = train_data.shape[0]
+    number_of_batches = samples_per_epoch/batch_size
+    counter=0
+    while 1:
+
+        X_batch = np.array(train_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+        y_batch = np.array(train_labels[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+        counter += 1
+        yield X_batch,y_batch
+
+        #restart counter to yeild data in the next epoch as well
+        if counter >= number_of_batches:
+            counter = 0
+
+        
 
 
 def compute_precision(model, x, y, reverse_data_dictionary, usage_scores, actual_classes_pos, topk, standard_conn, last_tool_id, lowest_tool_ids,actual_next_tool_names):
