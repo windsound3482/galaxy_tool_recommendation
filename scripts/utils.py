@@ -112,7 +112,7 @@ def collect_sampled_tool_freq(collected_dict, c_freq):
 
 
 def balanced_sample_generator(train_data, train_labels,batch_size):
-    samples_per_epoch = train_data.shape[0]
+    samples_per_epoch = len(train_data)
     number_of_batches = samples_per_epoch/batch_size
     counter=0
     while 1:

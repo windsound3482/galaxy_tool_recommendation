@@ -116,7 +116,8 @@ class HyperparameterOptimisation:
                 truee=0
                 for index,i in enumerate(y_pred_location[indexx]):
                     if (i in y_acc_location[indexx]):
-                        true_positive+=y_pred_values[indexx][index]
+                        if (y_acc_values[indexx][y_acc_location[indexx].index(i)]>0.5):
+                            true_positive+=y_pred_values[indexx][index]
                 
                 for i in y_acc_values[indexx]:
                     if (i>0.5):
@@ -147,8 +148,7 @@ class HyperparameterOptimisation:
             batch_size = int(params["batch_size"])
             model.compile(loss=utils.weighted_loss(class_weights), optimizer=optimizer_rms,metrics=[tf.keras.metrics.BinaryAccuracy(),nDCG,Precision,Recall,f1])
             model_fit = model.fit(
-                train_data,
-                train_labels,
+                utils.balanced_sample_generator(train_data,train_labels,batch_size),
                 steps_per_epoch=len(train_data) // batch_size,
                 epochs=optimize_n_epochs,
                 callbacks=[early_stopping],
