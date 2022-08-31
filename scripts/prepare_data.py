@@ -64,7 +64,7 @@ class PrepareData:
         dictionary, reverse_dictionary = self.assemble_dictionary(dictionary, old_data_dictionary)
         return dictionary, reverse_dictionary
 
-    def decompose_paths(self, paths, dictionary):
+    def decompose_paths(self, paths, dictionary,rec):
         """
         Decompose the paths to variable length sub-paths keeping the first tool fixed
         """
@@ -74,7 +74,10 @@ class PrepareData:
             len_tools = len(tools)
             if len_tools <= self.max_tool_sequence_len:
                 for window in range(0, len_tools-1):
-                    sequence = tools[window: len_tools]
+                    if rec:
+                        sequence = tools[window: len_tools]
+                    else:
+                        sequence = tools[0:window+1]
                     tools_pos = [str(dictionary[str(tool_item)]) for tool_item in sequence]
                     if len(tools_pos) > 1:
                         sub_paths_pos.append(",".join(tools_pos))
@@ -247,7 +250,7 @@ class PrepareData:
         random.shuffle(raw_paths)
 
         print("Decomposing paths...")
-        all_unique_paths = self.decompose_paths(raw_paths, dictionary)
+        all_unique_paths = self.decompose_paths(raw_paths, dictionary,rec)
         random.shuffle(all_unique_paths)
 
         print("Creating dictionaries...")
