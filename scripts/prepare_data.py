@@ -73,15 +73,15 @@ class PrepareData:
             tools = item.split(",")
             len_tools = len(tools)
             if len_tools <= self.max_tool_sequence_len:
-                for window in range(1, len_tools):
-                    sequence = tools[0: window + 1]
+                for window in range(0, len_tools-1):
+                    sequence = tools[window: len_tools]
                     tools_pos = [str(dictionary[str(tool_item)]) for tool_item in sequence]
                     if len(tools_pos) > 1:
                         sub_paths_pos.append(",".join(tools_pos))
         sub_paths_pos = list(set(sub_paths_pos))
         return sub_paths_pos
 
-    def prepare_paths_labels_dictionary(self, dictionary, reverse_dictionary, paths, compatible_next_tools):
+    def prepare_paths_labels_dictionary(self, dictionary, reverse_dictionary, paths, compatible_next_tools,rec):
         """
         Create a dictionary of sequences with their labels for training and test paths
         """
@@ -90,13 +90,24 @@ class PrepareData:
         for item in paths:
             if item and item not in "":
                 tools = item.split(",")
-                label = tools[-1]
-                train_tools = tools[:len(tools) - 1]
-                train_tools = ",".join(train_tools)
-                if train_tools in paths_labels:
-                    paths_labels[train_tools] += "," + label
+                if rec:
+                    label = tools[0]
+                    train_tools = tools[1:]
+                    train_tools.reverse()
+                    train_tools = ",".join(train_tools)
+                    if train_tools in paths_labels:
+                        paths_labels[train_tools] += "," + label
+                    else:
+                        paths_labels[train_tools] = label
                 else:
-                    paths_labels[train_tools] = label
+                    label = tools[-1]
+                    train_tools = tools[:len(tools) - 1]
+                    train_tools = ",".join(train_tools)
+                    if train_tools in paths_labels:
+                        paths_labels[train_tools] += "," + label
+                    else:
+                        paths_labels[train_tools] = label
+                
         for item in paths_labels:
             paths_labels[item] = ",".join(list(set(paths_labels[item].split(","))))
         return paths_labels
@@ -224,7 +235,7 @@ class PrepareData:
                     l_tool_tr_samples[last_tool_id].append(index)
         return l_tool_tr_samples
 
-    def get_data_labels_matrices(self, workflow_paths, tool_usage_path, cutoff_date, compatible_next_tools, standard_connections, old_data_dictionary={}):
+    def get_data_labels_matrices(self, workflow_paths, tool_usage_path, cutoff_date, compatible_next_tools, standard_connections,rec, old_data_dictionary={}):
         """
         Convert the training and test paths into corresponding numpy matrices
         """
@@ -240,7 +251,7 @@ class PrepareData:
         random.shuffle(all_unique_paths)
 
         print("Creating dictionaries...")
-        multilabels_paths = self.prepare_paths_labels_dictionary(dictionary, rev_dict, all_unique_paths, compatible_next_tools)
+        multilabels_paths = self.prepare_paths_labels_dictionary(dictionary, rev_dict, all_unique_paths, compatible_next_tools,rec)
 
         print("Complete data: %d" % len(multilabels_paths))
         train_paths_dict, test_paths_dict = self.split_test_train_data(multilabels_paths)

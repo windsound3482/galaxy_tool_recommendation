@@ -104,7 +104,7 @@ Execute data extraction script `extract_data.sh` to extract two tabular files - 
 
 ### (To reproduce this work on complete set of workflows) Example command:
 
-   `python scripts/main.py -wf data/worflow-connection-20-04.tsv -tu data/tool-popularity-20-04.tsv -om data/tool_recommendation_model.hdf5 -cd '2017-12-01' -pl 25 -ep 10 -oe 5 -me 20 -ts 0.2 -bs '32,256' -ut '32,256' -es '32,256' -dt '0.0,0.5' -sd '0.0,0.5' -rd '0.0,0.5' -lr '0.00001,0.1' -cpus 4`
+   `python scripts/main.py -wf data/worflow-connection-20-04.tsv -tu data/tool-popularity-20-04.tsv -om data/tool_recommendation_model_rec.hdf5 -cd '2017-12-01' -pl 25 -ep 10 -oe 5 -me 10 -ts 0.2 -bs '32,256' -ut '32,256' -es '32,256' -dt '0.0,0.5' -sd '0.0,0.5' -rd '0.0,0.5' -lr '0.00001,0.1' -cpus 4 -rec 'True'`
 
 Once the script finishes, `H5` model file is created at the given location (`path to trained model file`).
 

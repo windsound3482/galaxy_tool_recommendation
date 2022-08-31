@@ -110,6 +110,8 @@ if __name__ == "__main__":
     arg_parser.add_argument("-rd", "--recurrent_dropout", required=True, help="dropout for the recurrent layers")
     arg_parser.add_argument("-lr", "--learning_rate", required=True, help="learning rate")
     arg_parser.add_argument("-cpus", "--num_cpus", required=True, help="number of cpus for parallelism")
+    arg_parser.add_argument("-rec", "--rec", required=True, help="recTrain")
+    
 
     # get argument values
     args = vars(arg_parser.parse_args())
@@ -130,6 +132,7 @@ if __name__ == "__main__":
     recurrent_dropout = args["recurrent_dropout"]
     learning_rate = args["learning_rate"]
     num_cpus = int(args["num_cpus"])
+    rec= args["rec"]=='True'
 
     config = {
         'cutoff_date': cutoff_date,
@@ -151,11 +154,11 @@ if __name__ == "__main__":
     tf.config.run_functions_eagerly(True)
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
     connections = extract_workflow_connections.ExtractWorkflowConnections()
-    workflow_paths, compatible_next_tools, standard_connections = connections.read_tabular_file(workflows_path)
+    workflow_paths, compatible_next_tools, standard_connections = connections.read_tabular_file(workflows_path,rec)
     # Process the paths from workflows
     print("Dividing data...")
     data = prepare_data.PrepareData(maximum_path_length, test_share)
-    train_data, train_labels, test_data, test_labels, data_dictionary, reverse_dictionary, class_weights, usage_pred = data.get_data_labels_matrices(workflow_paths, tool_usage_path, cutoff_date, compatible_next_tools, standard_connections)
+    train_data, train_labels, test_data, test_labels, data_dictionary, reverse_dictionary, class_weights, usage_pred = data.get_data_labels_matrices(workflow_paths, tool_usage_path, cutoff_date, compatible_next_tools, standard_connections,rec)
     # find the best model and start training
     predict_tool = PredictTool(num_cpus)
     # start training with weighted classes

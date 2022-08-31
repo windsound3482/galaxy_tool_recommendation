@@ -15,7 +15,7 @@ class ExtractWorkflowConnections:
     def __init__(self):
         """ Init method. """
 
-    def read_tabular_file(self, raw_file_path):
+    def read_tabular_file(self, raw_file_path,rec):
         """
         Read tabular file and extract workflow connections
         """
@@ -40,10 +40,16 @@ class ExtractWorkflowConnections:
                     if qc:
                         i_t = format_tool_id(in_tool)
                         o_t = format_tool_id(out_tool)
-                        if i_t not in standard_connections:
-                            standard_connections[i_t] = list()
-                        if o_t not in standard_connections[i_t]:
-                            standard_connections[i_t].append(o_t)
+                        if (rec):
+                            if o_t not in standard_connections:
+                                standard_connections[o_t] = list()
+                            if i_t not in standard_connections[o_t]:
+                                standard_connections[o_t].append(i_t)
+                        else:
+                            if i_t not in standard_connections:
+                                standard_connections[i_t] = list()
+                            if o_t not in standard_connections[i_t]:
+                                standard_connections[i_t].append(o_t)
         print("Processing workflows...")
         wf_ctr = 0
         for wf_id in workflows:
@@ -75,7 +81,7 @@ class ExtractWorkflowConnections:
         no_dup_paths = list(set(unique_paths))
 
         print("Finding compatible next tools...")
-        compatible_next_tools = self.__set_compatible_next_tools(no_dup_paths)
+        compatible_next_tools = self.__set_compatible_next_tools(no_dup_paths,rec)
         return unique_paths, compatible_next_tools, standard_connections
 
     def __collect_standard_connections(self, row):
@@ -86,7 +92,7 @@ class ExtractWorkflowConnections:
             return True
         return False
 
-    def __set_compatible_next_tools(self, workflow_paths):
+    def __set_compatible_next_tools(self, workflow_paths,rec):
         """
         Find next tools for each tool
         """
@@ -96,7 +102,10 @@ class ExtractWorkflowConnections:
             for window in range(0, len(path_split) - 1):
                 current_tool = path_split[window]
                 next_tool = path_split[window+1]
-                next_tools[current_tool].append(next_tool)
+                if rec:
+                    next_tools[next_tool].append(current_tool)
+                else:
+                    next_tools[current_tool].append(next_tool)
         for tool in next_tools:
             next_tools[tool] = ",".join(list(set(next_tools[tool])))
         return next_tools
