@@ -252,7 +252,7 @@ class PrepareData:
         print("Decomposing paths...")
         all_unique_paths = self.decompose_paths(raw_paths, dictionary,rec)
         random.shuffle(all_unique_paths)
-
+        utils.write_file("data/path.txt", all_unique_paths)
         print("Creating dictionaries...")
         multilabels_paths = self.prepare_paths_labels_dictionary(dictionary, rev_dict, all_unique_paths, compatible_next_tools,rec)
 

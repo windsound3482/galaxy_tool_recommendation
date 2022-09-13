@@ -8,6 +8,7 @@ import random
 
 from scripts.utils import format_tool_id
 from collections import defaultdict
+from scripts import utils
 
 
 class ExtractWorkflowConnections:
@@ -55,7 +56,7 @@ class ExtractWorkflowConnections:
         for wf_id in workflows:
             wf_ctr += 1
             workflow_parents[wf_id] = self.__read_workflow(wf_id, workflows[wf_id])
-
+        utils.write_file("data/workflow_parents.txt", workflow_parents)
         for wf_id in workflow_parents:
             flow_paths = list()
             parents_graph = workflow_parents[wf_id]
@@ -77,9 +78,8 @@ class ExtractWorkflowConnections:
 
         # collect unique paths
         unique_paths = list(filter(None, unique_paths))
-        random.shuffle(unique_paths)
         no_dup_paths = list(set(unique_paths))
-
+        
         print("Finding compatible next tools...")
         compatible_next_tools = self.__set_compatible_next_tools(no_dup_paths,rec)
         return unique_paths, compatible_next_tools, standard_connections
