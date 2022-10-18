@@ -102,6 +102,8 @@ Execute data extraction script `extract_data.sh` to extract two tabular files - 
 
    - `<number of CPUs>`: This takes the number of CPUs to be allocated to parallelise the training of the neural network. E.g. `4`.
 
+   - `rec`: whether the model training should be in the rec direction (C->B get A) 
+
 ### (To reproduce this work on complete set of workflows) Example command:
 
    `python scripts/main.py -wf data/worflow-connection-20-04.tsv -tu data/tool-popularity-20-04.tsv -om data/tool_recommendation_model_rec.hdf5 -cd '2017-12-01' -pl 25 -ep 10 -oe 5 -me 10 -ts 0.2 -bs '32,256' -ut '32,256' -es '32,256' -dt '0.0,0.5' -sd '0.0,0.5' -rd '0.0,0.5' -lr '0.00001,0.1' -cpus 4 -rec 'True'`
